@@ -62,6 +62,7 @@ class CarState(CarStateBase):
     self.cluster_speed_counter = CLUSTER_SAMPLE_RATE
 
     self.params = CarControllerParams(CP)
+    self.creta_radar_debug = {}
 
   def recent_button_interaction(self) -> bool:
     # On some newer model years, the CANCEL button acts as a pause/resume button based on the PCM state
@@ -129,6 +130,24 @@ class CarState(CarStateBase):
       ret.cruiseState.standstill = cp_cruise.vl["SCC11"]["SCCInfoDisplay"] == 4.
       ret.cruiseState.nonAdaptive = cp_cruise.vl["SCC11"]["SCCInfoDisplay"] == 2.  # Shows 'Cruise Control' on dash
       ret.cruiseState.speed = cp_cruise.vl["SCC11"]["VSetDis"] * speed_conv
+
+    self.creta_radar_debug = {
+      "obj_valid": int(cp_cruise.vl["SCC11"]["ObjValid"]),
+      "obj_status": int(cp_cruise.vl["SCC11"]["ACC_ObjStatus"]),
+      "obj_dist_m": float(cp_cruise.vl["SCC11"]["ACC_ObjDist"]),
+      "obj_rel_speed_ms": float(cp_cruise.vl["SCC11"]["ACC_ObjRelSpd"]),
+      "obj_lat_pos_m": float(cp_cruise.vl["SCC11"]["ACC_ObjLatPos"]),
+      "tau_gap_set": int(cp_cruise.vl["SCC11"]["TauGapSet"]),
+      "scc_info_display": int(cp_cruise.vl["SCC11"]["SCCInfoDisplay"]),
+      "scc_acc_mode": int(cp_cruise.vl["SCC12"]["ACCMode"]),
+      "scc_takeover_req": int(cp_cruise.vl["SCC12"]["TakeOverReq"]),
+      "scc_aeb_status": int(cp_cruise.vl["SCC12"]["AEB_Status"]),
+      "scc_obj_gap": int(cp_cruise.vl["SCC14"]["ObjGap"]),
+      "fca_warn": int(cp_cruise.vl["FCA11"]["CF_VSM_Warn"]),
+      "fca_ttc_s": float(cp_cruise.vl["FCA11"]["FCA_TimetoCollision"]) / 1000.0,
+      "fca_rel_speed_ms": float(cp_cruise.vl["FCA11"]["FCA_RelativeVelocity"]),
+      "front_radar_equipped": int(cp_cruise.vl["FRT_RADAR11"]["CF_FCA_Equip_Front_Radar"]),
+    }
 
     # TODO: Find brake pressure
     ret.brake = 0
